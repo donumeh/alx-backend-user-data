@@ -5,6 +5,7 @@ import mysql.connector
 import os
 import re
 from typing import List
+from urllib.parse import quote_plus
 
 
 class RedactingFormatter(logging.Formatter):
@@ -69,11 +70,12 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
     """
     get_db: Returns a database connection
     """
-    db = mysql.connecto.connect(
+
+    db = mysql.connector.connect(
         database=os.getenv("PERSONAL_DATA_DB_NAME"),
         port=3306,
         user=os.getenv("PERSONAL_DATA_DB_USERNAME"),
-        password=os.getenv("PERSONAL_DATA_DB_PASSWORD"),
+        password=quote_plus(os.getenv("PERSONAL_DATA_DB_PASSWORD")),
         host=os.getenv("PERSONAL_DATA_DB_HOST"),
     )
     return db
