@@ -63,4 +63,4 @@ def get_logger() -> logging.Logger:
     logger.setFormatter(formatter)
 
 
-PII_FIELDS = ("email", "phone", "ssn", "password", "ip")
+PII_FIELDS = ("email", "phone", "ssn", "password", "name")
