@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Filter Datum"""
+from datetime import datetime
 import logging
 import mysql.connector
 import os
@@ -62,7 +63,9 @@ def get_logger() -> logging.Logger:
     # adds handler to logger
     logger.addHandler(stream_handler)
     # lastly set the formatter using `formatter` variable
-    logger.setFormatter(formatter)
+    stream_handler.setFormatter(formatter)
+
+    return logger
 
 
 def get_db() -> mysql.connector.connection.MySQLConnection:
@@ -75,12 +78,62 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
     host = os.environ.get("PERSONAL_DATA_DB_HOST", "localhost")
 
     db = mysql.connector.connect(
-        database=db_name,
-        user=user,
-        password=password,
-        host=host
+        database=db_name, user=user, password=password, host=host
     )
     return db
 
 
 PII_FIELDS = ("email", "phone", "ssn", "password", "name")
+
+
+def main() -> None:
+    """
+    Retrieve the database table and values
+    """
+    # get the database and execute sql script
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute("SELECT * FROM users;")
+
+    for row in cursor:
+
+        cols = [
+            "name",
+            "email",
+            "phone",
+            "ssn",
+            "password",
+            "ip",
+            "last_login",
+            "user_agent",
+        ]
+        record = list(row)
+
+        updated_record = []
+        col_cnt = 0
+        for data in row:
+
+            if col_cnt == "last_login":
+                d = datetime.isoformat(data)
+            else:
+                d = data
+
+            updated_record.append("{}={}".format(cols[col_cnt], d))
+            col_cnt += 1
+        updated_record = "; ".join(updated_record)
+        redacting_formatter = RedactingFormatter(PII_FIELDS)
+
+        log_record = logging.LogRecord(
+            "user_data", logging.INFO, None, None, updated_record, None, None
+        )
+        obfuscated_msg = redacting_formatter.format(log_record)
+        print(obfuscated_msg)
+        logger = get_logger()
+
+    cursor.close()
+    db.close()
+
+
+if __name__ == "__main__":
+    main()
