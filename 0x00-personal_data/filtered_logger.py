@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Filter Datum"""
 import logging
+import mysql.connector
+import os
 import re
 from typing import List
 
@@ -61,6 +63,20 @@ def get_logger() -> logging.Logger:
     logger.addHandler(stream_handler)
     # lastly set the formatter using `formatter` variable
     logger.setFormatter(formatter)
+
+
+def get_db() -> mysql.connector.connection.MySQLConnection:
+    """
+    get_db: Returns a database connection
+    """
+    db = mysql.connecto.connect(
+        database=os.getenv("PERSONAL_DATA_DB_NAME"),
+        port=3306,
+        user=os.getenv("PERSONAL_DATA_DB_USERNAME"),
+        password=os.getenv("PERSONAL_DATA_DB_PASSWORD"),
+        host=os.getenv("PERSONAL_DATA_DB_HOST"),
+    )
+    return db
 
 
 PII_FIELDS = ("email", "phone", "ssn", "password", "name")
