@@ -41,3 +41,26 @@ def filter_datum(
         r"\1=" + redaction,
         message,
     )
+
+
+def get_logger() -> logging.Logger:
+    """
+    Get logger takes no argument and returns logging.Logger
+    """
+    # create logger
+    logger: logging.Logger = logging.getLogger("user_data")
+    # set logger level
+    logger.setLevel(logging.INFO)
+    # set logger propagate
+    logger.propagate = False
+    # create log message formatter variable
+    formatter = RedactingFormatter.FORMAT
+    # handles stream handler
+    stream_handler = logging.StreamHandler()
+    # adds handler to logger
+    logger.addHandler(stream_handler)
+    # lastly set the formatter using `formatter` variable
+    logger.setFormatter(formatter)
+
+
+PII_FIELDS = ("email", "phone", "ssn", "password", "ip")
